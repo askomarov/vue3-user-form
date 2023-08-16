@@ -1,7 +1,7 @@
 {
   "name": "test-vue-form",
   "private": true,
-  "version": "0.0.0",
+  "version": "0.0.1",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@types/uuid": "^9.0.2",
+    "@vueuse/core": "^10.3.0",
     "pinia": "^2.1.6",
     "sass": "^1.65.1",
     "vue": "^3.3.4",

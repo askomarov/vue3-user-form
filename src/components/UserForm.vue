@@ -35,7 +35,7 @@ if (props.formMode === "edit" && props.userToEdit) {
   newUser.surname = userToEdit?.value?.surname || "";
   newUser.id = userToEdit?.value?.id || uuid();
   newUser.number = userToEdit?.value?.number || "";
-  newUser.role = userToEdit?.value?.role || "employee";
+  newUser.role = userToEdit?.value?.role || UserRoleEnums.employee;
 }
 const onRoleChange = (role: UserRoleEnums) => {
   if (role === UserRoleEnums.employee) {
@@ -54,7 +54,7 @@ const onSubmit = async () => {
       <v-radio-group
         v-model="newUser.role"
         @onchange="onRoleChange"
-        :disabled="formMode === 'edit'"
+        :disabled="formMode === UserFormModeEnums.edit"
       >
         <v-radio
           v-for="item in UserRoleEnums"
@@ -82,7 +82,7 @@ const onSubmit = async () => {
         :rules="[(v) => !!v || 'Field is required']"
       ></v-text-field>
       <v-text-field
-        v-if="newUser.role == 'manager'"
+        v-if="newUser.role === UserRoleEnums.manager"
         variant="outlined"
         clearable
         v-model="newUser.number"
@@ -98,7 +98,7 @@ const onSubmit = async () => {
       type="submit"
       variant="elevated"
     >
-      Create user
+      {{ formMode === UserFormModeEnums.edit ? "Update user" : "Create user" }}
     </v-btn>
   </v-form>
 </template>

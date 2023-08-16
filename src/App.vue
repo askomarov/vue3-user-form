@@ -1,28 +1,20 @@
 <script setup lang="ts">
-import { ref, reactive } from "vue";
+import { ref, reactive, computed } from "vue";
+import { useConfirmDialog } from "@vueuse/core";
+import { useUsersStore } from "@/store/usersStore";
 import UserItem from "@/components/UserItem.vue";
-import type { IUser } from "@/types/IUser.type";
 import UserForm from "@/components/UserForm.vue";
+import ConfirmDialog from "@/components/ConfirmDialog.vue";
+import type { IUser } from "@/types/IUser.type";
 import { UserFormModeEnums } from "@/types/UserFormModeEnums";
+import MyContact from "@/components/MyContact.vue";
+
+const isConfirmDialogOpen = ref(false);
+const confirmDialogInstance = useConfirmDialog(isConfirmDialogOpen);
 
 const isSurnameVisible = ref<boolean>(true);
-
-const users = ref<IUser[]>([
-  {
-    id: 1,
-    name: "John",
-    surname: "Legend",
-    role: "manager",
-    number: "+381621116045",
-    avatar: "https://cdn.vuetifyjs.com/images/john.jpg",
-  },
-  {
-    id: 2,
-    name: "Max",
-    surname: "Stranger",
-    role: "employee",
-  },
-]);
+const userStore = useUsersStore();
+const users = computed(() => userStore.getUsersData);
 const userFormOptions = reactive({
   mode: UserFormModeEnums.new,
   title: "Создать новый Тег",
@@ -60,29 +52,26 @@ const onButtonOpenUserForm = (
 
   openUserFormModal();
 };
-const onBtnDeleteUserClick = (userId: number | string) => {
-  console.log(userId);
-};
+const userIdToDelete = ref<number | string>();
 
-const updateUser = (payload: IUser, id: number | string) => {
-  users.value = users.value.map((user) => {
-    if (user.id === id) {
-      return payload;
-    }
-    return user;
-  });
+confirmDialogInstance.onConfirm((result) => {
+  if (!result || !userIdToDelete.value) return;
+  userStore.deleteUserById(userIdToDelete.value);
+});
+const onBtnDeleteUserClick = (userId: number | string) => {
+  userIdToDelete.value = userId;
+  isConfirmDialogOpen.value = true;
 };
 
 const onSubmitUserForm = (payload: IUser) => {
-  console.log(payload);
   switch (userFormOptions.mode) {
-    case "edit":
+    case UserFormModeEnums.edit:
       if (!currentUser.value) return;
-      updateUser(payload, currentUser.value.id);
+      userStore.updateUserData(payload, currentUser.value.id);
       break;
 
     default:
-      users.value.push(payload);
+      userStore.addNewUser(payload);
       break;
   }
   closeUserFormModal();
@@ -99,7 +88,7 @@ const onSubmitUserForm = (payload: IUser) => {
         >Add user</v-btn
       >
       <v-checkbox
-      class="header__checkbox"
+        class="header__checkbox"
         v-model="isSurnameVisible"
         label="Show surname"
         hide-details
@@ -117,10 +106,11 @@ const onSubmitUserForm = (payload: IUser) => {
       ></user-item>
     </ul>
   </v-sheet>
-  <!--  -->
+  <!-- user form -->
   <v-dialog v-model="userFormOptions.open">
     <v-sheet class="form-wrap" rounded="xl" elevation="6">
       <header>
+        <h2 class="form-wrap__title">{{ userFormOptions.title }}</h2>
         <v-btn
           class="form-wrap__btn-close"
           color="primary"
@@ -137,23 +127,32 @@ const onSubmitUserForm = (payload: IUser) => {
       ></user-form>
     </v-sheet>
   </v-dialog>
+  <!-- confirm  dialog -->
+  <confirm-dialog
+    v-model="isConfirmDialogOpen"
+    @agree="confirmDialogInstance.confirm(true)"
+    @cancel="confirmDialogInstance.confirm(false)"
+  ></confirm-dialog>
+  <my-contact></my-contact>
 </template>
 
 <style scoped lang="scss">
 .content {
   padding: 1rem;
   display: grid;
+  align-self: start;
   gap: 1rem;
 }
 .header {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: 0.5rem;
 }
-.header__title{
+.header__title {
   flex: 1 0 auto;
 }
-.header__checkbox{
+.header__checkbox {
   flex: 0 1 auto;
 }
 .users-list {
@@ -161,11 +160,18 @@ const onSubmitUserForm = (payload: IUser) => {
   display: grid;
   gap: 1rem;
   width: 100%;
+  padding: 1rem;
+  box-shadow: inset 0 0 6px 0 $gray300;
+  border-radius: 1rem;
 }
 .form-wrap {
-  background-color: #fff;
+  background-color: $white;
   padding: 2rem;
   position: relative;
+}
+.form-wrap__title {
+  text-align: center;
+  margin: 0 0 1rem;
 }
 .form-wrap__btn-close {
   position: absolute;

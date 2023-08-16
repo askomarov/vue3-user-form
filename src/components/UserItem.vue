@@ -30,7 +30,7 @@ withDefaults(defineProps<UserProps>(), {
         }}</span>
       </h3>
       <p class="user-item__role">{{ user.role }}</p>
-      <a v-if="(user.role === 'manager')" :href="`tel:${user.number}`">{{
+      <a v-if="user.role === 'manager'" :href="`tel:${user.number}`">{{
         user.number
       }}</a>
     </div>
@@ -53,14 +53,23 @@ withDefaults(defineProps<UserProps>(), {
 
 <style scoped lang="scss">
 // asd
-.user-item{
+.user-item {
   display: grid;
-  grid-template-columns: 1fr auto;
   gap: 1rem;
+  justify-items: center;
+  @media (min-width: 667px) {
+    justify-items: stretch;
+    grid-template-columns: 1fr auto;
+    &:not(:last-child){
+      padding-bottom: 1rem;
+      border-bottom: 1px solid $gray300;
+    }
+  }
 }
 
 .user-item__meta {
   display: flex;
+  flex-wrap: wrap;
   gap: 1rem;
   align-items: center;
   justify-content: flex-start;
