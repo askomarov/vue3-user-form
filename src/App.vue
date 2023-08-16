@@ -97,6 +97,7 @@ const onSubmitUserForm = (payload: IUser) => {
     </header>
     <ul class="users-list">
       <user-item
+      v-if="users.length"
         v-for="user in users"
         :key="user.id"
         :user="user"
@@ -104,6 +105,9 @@ const onSubmitUserForm = (payload: IUser) => {
         @edit-user="onButtonOpenUserForm(UserFormModeEnums.edit, user)"
         @delete-user="onBtnDeleteUserClick(user.id)"
       ></user-item>
+      <li v-else>
+       🙂 Add first user
+      </li>
     </ul>
   </v-sheet>
   <!-- user form -->
